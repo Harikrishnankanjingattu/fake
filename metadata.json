@@ -1,0 +1,8 @@
+
+{
+  "name": "Kumbidi - Fake Palmistry",
+  "description": "A hilarious and mocking Malayalam palmistry app featuring the legendary Kumbidi. Upload your palm for an intentionally wrong and funny prediction.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
