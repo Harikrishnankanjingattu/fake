@@ -125,7 +125,7 @@ const App: React.FC = () => {
           </a>
 
           <a
-            href="https://www.instagram.com/harikrishnankk"
+            href="https://www.instagram.com/harikrishnan__kanjingattu?igsh=MXNhcmV0am43ZjVhdA=="
             target="_blank"
             rel="noopener noreferrer"
             className="px-8 py-4 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-bold text-lg rounded-xl shadow hover:scale-105 transition"
