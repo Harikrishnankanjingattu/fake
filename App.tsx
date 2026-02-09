@@ -13,6 +13,8 @@ const App: React.FC = () => {
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [prediction, setPrediction] = useState<PalmPrediction | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [coins, setCoins] = useState(20);
+  const [lastImageData, setLastImageData] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -21,7 +23,7 @@ const App: React.FC = () => {
   }, []);
 
   const startIntro = () => {
-    audioRef.current?.play().catch(() => {});
+    audioRef.current?.play().catch(() => { });
     setTimeout(() => {
       setShowIntro(false);
       setShowDisclaimer(true);
@@ -29,10 +31,11 @@ const App: React.FC = () => {
   };
 
   const handleImageSelected = async (base64: string) => {
+    setLastImageData(base64);
     setState(AppState.LOADING);
     setError(null);
     try {
-      const result = await analyzePalm(base64);
+      const result = await analyzePalm(base64, false);
       setPrediction(result);
       setState(AppState.RESULT);
     } catch (err: any) {
@@ -41,10 +44,31 @@ const App: React.FC = () => {
     }
   };
 
+  const handleImprove = async () => {
+    if (coins < 10) {
+      alert("കോയിൻ തീർന്നു! ഇനി ഒന്നും ചെയ്യാനില്ല.");
+      return;
+    }
+
+    if (!lastImageData) return;
+
+    setState(AppState.LOADING);
+    try {
+      const result = await analyzePalm(lastImageData, true);
+      setPrediction(result);
+      setCoins(prev => prev - 10);
+      setState(AppState.RESULT);
+    } catch (err: any) {
+      setError(err.message || "ഭാവി നന്നാക്കാൻ പറ്റിയില്ല!");
+      setState(AppState.ERROR);
+    }
+  };
+
   const handleReset = () => {
     setState(AppState.IDLE);
     setPrediction(null);
     setError(null);
+    setLastImageData(null);
   };
 
   /* ================= INTRO ================= */
@@ -61,7 +85,7 @@ const App: React.FC = () => {
         />
 
         <p className="text-2xl font-black text-yellow-600 italic animate-in slide-in-from-bottom duration-1000 delay-500">
-          "താൻ ആരാണെന്ന് തനിക്ക് അറിയില്ലെങ്കിൽ  
+          "താൻ ആരാണെന്ന് തനിക്ക് അറിയില്ലെങ്കിൽ
           <br />
           താൻ ഇവിടെ വാ, ഞാൻ പറഞ്ഞു തരാം!"
         </p>
@@ -86,8 +110,8 @@ const App: React.FC = () => {
         </h2>
 
         <p className="text-xl text-yellow-800 font-bold max-w-md leading-relaxed">
-          ഇതൊരു ഉഡായിപ്പ് പരിപാടിയാണ്.  
-          ഇതിൽ പറയുന്ന കാര്യങ്ങൾ സത്യമാണെന്ന് കരുതി  
+          ഇതൊരു ഉഡായിപ്പ് പരിപാടിയാണ്.
+          ഇതിൽ പറയുന്ന കാര്യങ്ങൾ സത്യമാണെന്ന് കരുതി
           ലോട്ടറി എടുക്കാൻ പോകരുത്!
           <br /><br />
           (Purely for fun. Don’t lose money!)
@@ -153,7 +177,7 @@ const App: React.FC = () => {
         {state === AppState.IDLE && (
           <div className="w-full max-w-md text-center">
             <p className="text-xl font-bold text-yellow-800 mb-10">
-              കുമ്പിടി നിങ്ങളുടെ രഹസ്യങ്ങൾ വിളിച്ചു പറയും!  
+              കുമ്പിടി നിങ്ങളുടെ രഹസ്യങ്ങൾ വിളിച്ചു പറയും!
               <br />
               ധൈര്യമുണ്ടെങ്കിൽ തൊടൂ!
             </p>
@@ -164,7 +188,12 @@ const App: React.FC = () => {
         {state === AppState.LOADING && <LoadingScreen />}
 
         {state === AppState.RESULT && prediction && (
-          <ResultDisplay result={prediction} onReset={handleReset} />
+          <ResultDisplay
+            result={prediction}
+            onReset={handleReset}
+            coins={coins}
+            onImprove={handleImprove}
+          />
         )}
 
         {state === AppState.ERROR && (
