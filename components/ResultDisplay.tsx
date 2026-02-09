@@ -41,62 +41,71 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onReset, coins, o
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Canvas settings
+    // Canvas settings - dynamic height based on content
     canvas.width = 600;
-    canvas.height = 800;
+    canvas.height = 700;
 
     // Background
-    const gradient = ctx.createLinearGradient(0, 0, 0, 800);
-    gradient.addColorStop(0, '#fef9c3'); // yellow-100
-    gradient.addColorStop(1, '#ffffff');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 700);
+    gradient.addColorStop(0, '#ffffff');
+    gradient.addColorStop(1, '#fef9c3'); // yellow-100
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 600, 800);
+    ctx.fillRect(0, 0, 600, 700);
 
     // Border
     ctx.strokeStyle = '#eab308'; // yellow-500
-    ctx.lineWidth = 20;
-    ctx.strokeRect(0, 0, 600, 800);
+    ctx.lineWidth = 15;
+    ctx.strokeRect(0, 0, 600, 700);
 
-    // Load logo/swami image
+    // Load logo
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.src = "https://raw.githubusercontent.com/Harikrishnankanjingattu/fake/main/logo.png";
 
     img.onload = () => {
-      // Draw image
-      ctx.drawImage(img, 150, 40, 300, 150);
+      // 1. Logo (Center Top)
+      ctx.drawImage(img, 225, 30, 150, 75);
 
-      // Title
-      ctx.fillStyle = '#ca8a04'; // yellow-600
-      ctx.font = 'bold 40px sans-serif';
+      // 2. Title
+      ctx.fillStyle = '#ca8a04';
+      ctx.font = 'bold 32px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('കുമ്പിടി ജ്യോതിഷം', 300, 240);
+      ctx.fillText('കുമ്പിടി ജ്യോതിഷം', 300, 140);
 
-      // Luck Rating
-      ctx.fillStyle = '#854d0e'; // yellow-800
-      ctx.font = 'bold 30px sans-serif';
-      ctx.fillText(`ഭാഗ്യം: ${result.rating}`, 300, 290);
+      // 3. Rating (Stacked)
+      ctx.fillStyle = '#854d0e';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText(`നിങ്ങളുടെ ഭാഗ്യം: ${result.rating}`, 300, 180);
 
-      // Prediction Label
-      ctx.font = 'black 20px sans-serif';
-      ctx.fillText('പ്രവചനം:', 300, 350);
+      // 4. Content Block (Clubbed together)
+      let currentY = 240;
 
-      // Wrapped Prediction Text
-      ctx.fillStyle = '#1f2937'; // gray-800
-      ctx.font = 'bold 22px sans-serif';
-      wrapText(ctx, result.prediction, 300, 390, 500, 30);
+      // Prediction
+      ctx.fillStyle = '#eab308';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText('പ്രവചനം', 300, currentY);
+      currentY += 30;
+
+      ctx.fillStyle = '#1f2937';
+      ctx.font = 'bold 20px sans-serif';
+      currentY = wrapText(ctx, result.prediction, 300, currentY, 520, 28);
+      currentY += 40;
 
       // Remedy
-      ctx.fillStyle = '#a16207'; // yellow-700
-      ctx.font = 'italic bold 20px sans-serif';
-      ctx.fillText('പരിഹാരം:', 300, 600);
-      ctx.fillStyle = '#854d0e';
-      wrapText(ctx, result.remedy, 300, 640, 500, 28);
+      ctx.fillStyle = '#a16207';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText('പരിഹാരം', 300, currentY);
+      currentY += 30;
 
-      // Wisdom
-      ctx.fillStyle = '#ca8a04';
+      ctx.fillStyle = '#854d0e';
       ctx.font = 'italic bold 18px sans-serif';
-      ctx.fillText(`"${result.kumbidiWisdom}"`, 300, 750);
+      currentY = wrapText(ctx, result.remedy, 300, currentY, 520, 26);
+      currentY += 60;
+
+      // 5. Wisdom (Bottom Highlight)
+      ctx.fillStyle = '#ca8a04';
+      ctx.font = 'italic 24px sans-serif';
+      ctx.fillText(`"${result.kumbidiWisdom}"`, 300, 650);
 
       // Download
       const dataUrl = canvas.toDataURL('image/png');
@@ -107,8 +116,8 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onReset, coins, o
     };
   };
 
-  // Helper for text wrapping on canvas
-  const wrapText = (context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) => {
+  // Helper for text wrapping on canvas - returns next Y position
+  const wrapText = (context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number): number => {
     const words = text.split(' ');
     let line = '';
     let currentY = y;
@@ -126,6 +135,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onReset, coins, o
       }
     }
     context.fillText(line, x, currentY);
+    return currentY + lineHeight;
   };
 
   const handleImproveClick = () => {
@@ -190,9 +200,9 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onReset, coins, o
         </section>
 
         <div className="pt-6 text-center">
-          <div className="inline-block px-8 py-4 bg-yellow-500 rounded-xl border-4 border-yellow-600">
-            <p className="text-lg font-black text-white italic leading-none">"{result.kumbidiWisdom}"</p>
-          </div>
+          <p className="text-2xl font-black text-yellow-600 italic">
+            "{result.kumbidiWisdom}"
+          </p>
         </div>
 
         {/* End of content marker */}
